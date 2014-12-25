@@ -8,7 +8,7 @@ requirements
 ------------
 installed python3
 
-start prepare for local python3 virtualenv
+start ./prepare.sh for local python3 virtualenv
 (it will install pygame locally)
 
 run the game
