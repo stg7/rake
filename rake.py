@@ -40,15 +40,18 @@ k = 512
 """
 diamond square algo, see http://en.wikipedia.org/wiki/Diamond-square_algorithm
 """
+
+
 def init_map(k):
     gmap = [
-        [ 0 for i in range(0, size_y // tile_size)] for j in range(0, size_x // tile_size)
+        [0 for i in range(0, size_y // tile_size)] for j in range(0, size_x // tile_size)
     ]
     gmap[0][0] = random.randint(0, 256)
     gmap[-1][0] = random.randint(0, 256)
     gmap[0][-1] = random.randint(0, 256)
     gmap[-1][-1] = random.randint(0, 256)
     return gmap
+
 
 def diamond_square_it(gmap, x1, y1, x2, y2, range_v, level):
 
@@ -60,28 +63,29 @@ def diamond_square_it(gmap, x1, y1, x2, y2, range_v, level):
                 b = gmap[i][j - level]
                 c = gmap[i - level][j]
                 d = gmap[i][j]
-                gmap[i - level // 2][j - level // 2]  = (a + b + c + d) / 4 + (2 * random.random() -1) * range_v
+                gmap[i - level // 2][j - level // 2] = (a + b + c + d) / 4 + (2 * random.random() - 1) * range_v
 
         # squares
         for i in range(x1 + 2 * level, x2, level):
             for j in range(y1 + 2 * level, y2, level):
-                a = gmap[i - level][j - level];
-                b = gmap[i][j - level];
-                c = gmap[i - level][j];
-                d = gmap[i][j];
-                e = gmap[i - level // 2][j - level // 2];
+                a = gmap[i - level][j - level]
+                b = gmap[i][j - level]
+                c = gmap[i - level][j]
+                d = gmap[i][j]
+                e = gmap[i - level // 2][j - level // 2]
 
-                gmap[i - level][j - level // 2] = (a + c + e + gmap[i - 3 * level // 2][j - level // 2]) / 4 + (2 * random.random() -1) * range_v
-                gmap[i - level // 2][j - level] = (a + b + e + gmap[i - level // 2][j - 3 * level // 2]) / 4 + (2 * random.random() -1) * range_v
-        level //=2
+                gmap[i - level][j - level // 2] = (a + c + e + gmap[i - 3 * level // 2][j - level // 2]) / 4 + (2 * random.random() - 1) * range_v
+                gmap[i - level // 2][j - level] = (a + b + e + gmap[i - level // 2][j - 3 * level // 2]) / 4 + (2 * random.random() - 1) * range_v
+        level //= 2
         range_v //= 2
 
     return gmap
 
 
 def update_map(gmap, k):
-    #return diamond_square(gmap, 0, 0, len(gmap) - 1, len(gmap[0]) -1, k)
-    return diamond_square_it(gmap, 0, 0, len(gmap) - 1, len(gmap[0]) -1, k, len(gmap))
+    # return diamond_square(gmap, 0, 0, len(gmap) - 1, len(gmap[0]) -1, k)
+    return diamond_square_it(gmap, 0, 0, len(gmap) - 1, len(gmap[0]) - 1, k, len(gmap))
+
 
 def normalize_map(gmap, scale_min=0.001, scale_max=0.001):
     lis = []
@@ -90,16 +94,17 @@ def normalize_map(gmap, scale_min=0.001, scale_max=0.001):
     lis.sort()
 
     # normalize gamemap
-    min_v = lis[int(scale_min*(len(lis) -1))]
-    max_v = lis[-int(scale_max*(len(lis) -1))]
+    min_v = lis[int(scale_min * (len(lis) - 1))]
+    max_v = lis[-int(scale_max * (len(lis) - 1))]
 
-    gmap = [[ max(min_v, y) for y in x] for x in gmap]
+    gmap = [[max(min_v, y) for y in x] for x in gmap]
 
-    gmap = [[ min(max_v, y) for y in x] for x in gmap]
+    gmap = [[min(max_v, y) for y in x] for x in gmap]
 
-    gmap = [[ 255 * (y - min_v) / (max_v - min_v) for y in x] for x in gmap]
+    gmap = [[255 * (y - min_v) / (max_v - min_v) for y in x] for x in gmap]
 
     return gmap
+
 
 def handle_key(direction):
     if pygame.key.get_pressed()[pygame.K_UP] != 0 and direction[0] != 1:
@@ -111,10 +116,11 @@ def handle_key(direction):
     if pygame.key.get_pressed()[pygame.K_RIGHT] != 0 and direction[1] != -1:
         return (0, 1)
 
-    if pygame.key.get_pressed()[pygame.K_DOWN] != 0  and direction[0] != -1:
+    if pygame.key.get_pressed()[pygame.K_DOWN] != 0 and direction[0] != -1:
         return (1, 0)
 
     return direction
+
 
 def handle_event():
     event = pygame.event.poll()
@@ -128,9 +134,10 @@ def handle_event():
         lDbg("You released the left mouse button at (%d, %d)" % event.pos)
     return False
 
+
 def draw_map(screen, gmap, lower_limit, upper_limit):
     for i in range(1, len(gmap) - 1):
-        for j in range(1, len(gmap[i])-1):
+        for j in range(1, len(gmap[i]) - 1):
             x = tile_size * i
             y = tile_size * j
             c = int(gmap[i][j])
@@ -142,20 +149,22 @@ def draw_map(screen, gmap, lower_limit, upper_limit):
 
             pygame.draw.rect(screen, color, (x, y, tile_size, tile_size), 0)
 
+
 def intro(screen, upper_limit=200):
     myfont = pygame.font.SysFont("monospace", 40)
     clock = pygame.time.Clock()
     for i in range(10, 200, 10):
         gamemap = normalize_map(update_map(init_map(k), k))
         draw_map(screen, gamemap, i, upper_limit)
-        label = myfont.render("rake - rescue snake..", 1, (255,0,0))
+        label = myfont.render("rake - rescue snake..", 1, (255, 0, 0))
         screen.blit(label, (100, 100))
         pygame.display.flip()
         msElapsed = clock.tick(30)
 
-def outtro(screen, round_nr ,end, upper_limit=200):
+
+def outtro(screen, round_nr, end, upper_limit=200):
     myfont = pygame.font.SysFont("monospace", 40)
-    label = myfont.render("you " + end + " in round.."  + str(round_nr), 1, (255,0,0))
+    label = myfont.render("you " + end + " in round.." + str(round_nr), 1, (255, 0, 0))
 
     clock = pygame.time.Clock()
     run = 0
@@ -170,7 +179,7 @@ def outtro(screen, round_nr ,end, upper_limit=200):
         draw_map(screen, gamemap, 20, upper_limit)
 
         if run > 200:
-            label = myfont.render("play again (y) or quit (n)", 1, (255,0,0))
+            label = myfont.render("play again (y) or quit (n)", 1, (255, 0, 0))
 
         screen.blit(label, (100, 100))
         pygame.display.flip()
@@ -178,6 +187,7 @@ def outtro(screen, round_nr ,end, upper_limit=200):
         run += 10
 
     return False
+
 
 def play(screen, lower_limit=10, upper_limit=200):
     clock = pygame.time.Clock()
@@ -192,7 +202,7 @@ def play(screen, lower_limit=10, upper_limit=200):
         end = "start"
         while end not in ["loose", "win"]:
 
-            if handle_event() == True:
+            if handle_event() is True:
                 end = "exit"
                 break
 
@@ -222,13 +232,11 @@ def play(screen, lower_limit=10, upper_limit=200):
 
             if end == "start":
                 # render text
-                label = myfont.render("prepare for round.." + str(round_nr), 1, (255,0,0))
+                label = myfont.render("prepare for round.." + str(round_nr), 1, (255, 0, 0))
                 screen.blit(label, (100, 100))
-
 
             pygame.display.flip()
             msElapsed = clock.tick(30)
-
 
             if direction != (0, 0):
                 if run % 20 == 0:
@@ -258,12 +266,12 @@ def main():
     intro(screen)
 
     again = True
-    while again == True:
+    while again is True:
         (round_nr, end) = play(screen)
         again = outtro(screen, round_nr, end)
 
     lInfo("game done.")
 
+
 if __name__ == "__main__":
     main()
-
