@@ -32,11 +32,7 @@ check_tools "python3 pyvenv"
 
 pyvenv --copies py
 . py/bin/activate
-cd py
-hg clone https://bitbucket.org/pygame/pygame
-cd pygame
-python3 setup.py build
-python3 setup.py install
-#pip install numpy
+
+pip3 install pygame
 
 logInfo "done."
